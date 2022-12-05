@@ -12,6 +12,12 @@ importers:
       minimist: 1.2.7
       typescript: 4.9.3
 
+  packages/reactivity:
+    specifiers:
+      '@vue/shared': workspace:^1.0.0
+    dependencies:
+      '@vue/shared': link:../shared
+
 packages:
 
   /@esbuild/android-arm/0.15.18:
