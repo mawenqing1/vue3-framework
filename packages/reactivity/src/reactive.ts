@@ -1,9 +1,7 @@
 import { isObj } from "@vue/shared";
+import {baseHandler, ReactiveFlags} from "./baseHandler";
 
 const reactiveMap = new WeakMap();
-const enum ReactiveFlags {
-    IS_REACTIVE = '_v_isReactive'
-}
 
 export function reactive(target) {
     if(!isObj(target)) {
@@ -17,19 +15,7 @@ export function reactive(target) {
         return existing
     }
 
-    const proxy = new Proxy(target, {
-        get(target, key, receiver) {
-            console.log('get');
-            if(key === ReactiveFlags.IS_REACTIVE) {
-                return true
-            }
-            return Reflect.get(target, key, receiver)
-        },
-        set(target, key, value, receiver) {
-            console.log('set');
-            return Reflect.set(target, key, value, receiver)
-        }
-    });
+    const proxy = new Proxy(target, baseHandler);
     reactiveMap.set(target, proxy)
     return proxy;
 }

@@ -12,14 +12,22 @@
     <script>
         const {effect, reactive} = VueReactivity;
 
-        const state = reactive({
+        const obj = {
             name: 'mwq',
             age: 24,
             address: {
                 cnt: 1002
             }
-        });
-        console.log(state);
+        };
+        const state = reactive(obj);
+
+        effect(() => {
+            app.innerHTML = state.name + state.age + state.address.cnt;
+            // setInterval(() => {
+            //     state.age++
+            //     console.log(state.age);
+            // }, 1000)
+        })
     </script>
     
 </body>
