@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/index.ts", "../../shared/src/index.ts", "../src/reactive.ts", "../src/effect.ts"],
+  "sourcesContent": ["export { reactive } from \"./reactive\";\nexport { effect } from \"./effect\";", "export const isObj = (val) => {\n    return typeof val === 'object' && val !== null\n}", "import { isObj } from \"@vue/shared\";\n\nexport function reactive(target) {\n    if(!isObj(target)) {\n        return target\n    }\n\n    const proxy = new Proxy(target, {\n        get(target, key, receiver) {\n            console.log('get');\n            \n            return target[key]\n        },\n        set(target, key, value, receiver) {\n            console.log('set');\n            \n            target[key] = value;\n            return true\n        }\n    });\n    return proxy;\n}", "export function effect() {\n    \n}"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;;;ACAO,MAAM,QAAQ,CAAC,QAAQ;AAC1B,WAAO,OAAO,QAAQ,YAAY,QAAQ;AAAA,EAC9C;;;ACAO,WAAS,SAAS,QAAQ;AAC7B,QAAG,CAAC,MAAM,MAAM,GAAG;AACf,aAAO;AAAA,IACX;AAEA,UAAM,QAAQ,IAAI,MAAM,QAAQ;AAAA,MAC5B,IAAIA,SAAQ,KAAK,UAAU;AACvB,gBAAQ,IAAI,KAAK;AAEjB,eAAOA,QAAO;AAAA,MAClB;AAAA,MACA,IAAIA,SAAQ,KAAK,OAAO,UAAU;AAC9B,gBAAQ,IAAI,KAAK;AAEjB,QAAAA,QAAO,OAAO;AACd,eAAO;AAAA,MACX;AAAA,IACJ,CAAC;AACD,WAAO;AAAA,EACX;;;ACrBO,WAAS,SAAS;AAAA,EAEzB;",
+  "names": ["target"]
+}
