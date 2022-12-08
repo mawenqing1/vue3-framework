@@ -35,6 +35,7 @@ var VueReactivity = (() => {
     constructor(fn) {
       this.active = true;
       this.parent = null;
+      this.deps = [];
       this.fn = fn;
     }
     run() {
@@ -44,6 +45,7 @@ var VueReactivity = (() => {
         try {
           this.parent = activeEffect;
           activeEffect = this;
+          return this.fn();
         } finally {
           activeEffect = this.parent;
           this.parent = null;
@@ -51,7 +53,36 @@ var VueReactivity = (() => {
       }
     }
   };
+  var targetMap = /* @__PURE__ */ new WeakMap();
+  function trigger(target, key, value) {
+    let depsMap = targetMap.get(target);
+    if (!depsMap) {
+      return;
+    }
+    const effects = depsMap.get(key);
+    effects && effects.forEach((effect2) => {
+      if (effect2 !== activeEffect) {
+        effect2.run();
+      }
+    });
+  }
   function track(target, key) {
+    if (activeEffect) {
+      let depsMap = targetMap.get(target);
+      if (!depsMap) {
+        targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
+      }
+      let deps = depsMap.get(key);
+      if (!deps) {
+        depsMap.set(key, deps = /* @__PURE__ */ new Set());
+      }
+      let shouldTrack = !deps.has(activeEffect);
+      if (shouldTrack) {
+        deps.add(activeEffect);
+        activeEffect.deps.push(deps);
+      }
+    }
+    console.log(targetMap);
   }
   function effect(fn) {
     const _effect = new ReactiveEffect(fn);
@@ -70,7 +101,12 @@ var VueReactivity = (() => {
     },
     set(target, key, value, receiver) {
       console.log("set");
-      return Reflect.set(target, key, value, receiver);
+      let oldValue = target[key];
+      if (oldValue !== value) {
+        let result = Reflect.set(target, key, value, receiver);
+        trigger(target, key, value);
+        return result;
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-import { track } from "./effect";
+import { track, trigger } from "./effect";
 
 export const enum ReactiveFlags {
     IS_REACTIVE = '_v_isReactive'
@@ -15,6 +15,11 @@ export const baseHandler = {
     },
     set(target, key, value, receiver) {
         console.log('set');
-        return Reflect.set(target, key, value, receiver)
+        let oldValue = target[key];
+        if(oldValue !== value) {
+           let result = Reflect.set(target, key, value, receiver);
+           trigger(target, key, value);
+           return result
+        }
     }
 }

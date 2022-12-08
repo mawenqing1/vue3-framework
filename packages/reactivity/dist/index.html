@@ -20,14 +20,13 @@
             }
         };
         const state = reactive(obj);
-
+        
         effect(() => {
             app.innerHTML = state.name + state.age + state.address.cnt;
-            // setInterval(() => {
-            //     state.age++
-            //     console.log(state.age);
-            // }, 1000)
         })
+        setTimeout(() => {
+            state.age++
+        }, 1000)
     </script>
     
 </body>
