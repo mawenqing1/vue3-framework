@@ -20,6 +20,7 @@
             }
         };
         const state = reactive(obj);
+        const state1 = reactive(state);
         
         effect(() => {
             app.innerHTML = state.name + state.age + state.address.cnt;
