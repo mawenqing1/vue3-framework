@@ -10,47 +10,25 @@
         <script src="./reactivity.global.js"></script>
         <div id="app"></div>
         <script>
-            const { effect, reactive } = VueReactivity;
+            const { effect, reactive, computed } = VueReactivity;
 
-            let waiting = false;
             const state = reactive({
-                flag: true,
-                name: "mwq",
-                age: 25,
-                n: {
-                    m: 20,
-                },
+                firstName: '马',
+                lastName: '卿'
             });
-            const runner = effect(
-                () => {
-                    console.log("render");
-                    document.body.innerHTML = state.n.m;
-                },
-                {
-                    scheduler() {
-                        if (!waiting) {
-                            waiting = true;
-                            Promise.resolve().then(() => {
-                                runner();
-                                waiting = false;
-                            });
-                        }
-                    },
-                }
-            );
-            //    runner.effect.stop();
 
+            let fullName = computed(() => {
+                return state.firstName + state.lastName
+            });
+            // fullName.value = '哈哈'
+            console.log(computed);
+
+            effect(() => {
+                app.innerHTML = fullName.value;
+            })
             setTimeout(() => {
-                state.n.m++;
-                state.n.m++;
-                state.n.m++;
-                // state.flag = false;
-                // runner()
-                // setTimeout(() => {
-                //     console.log('不更新');
-                //     state.name = 'qwm'
-                // }, 1000)
-            }, 1000);
+                state.firstName = '123'
+            }, 1000)
         </script>
     </body>
 </html>

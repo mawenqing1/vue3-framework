@@ -12,7 +12,7 @@ export class ReactiveEffect {
     public active = true;
     public parent = null;
     public deps = [];
-    constructor(public fn, public scheduler) {
+    constructor(public fn, public scheduler?) {
         this.fn = fn;
     }
     run() {
@@ -46,11 +46,15 @@ export function trigger(target, key, value) {
         return;
     }
     let effects = depsMap.get(key);
+    triggerEffects(effects)
+};
+
+export function triggerEffects(effects) {
     if (effects) {
         effects = new Set(effects);
         effects && effects.forEach(effect => {
             if (effect !== activeEffect) {
-                if(effect.scheduler) {
+                if (effect.scheduler) {
                     effect.scheduler()
                 } else {
                     effect.run();
@@ -58,7 +62,7 @@ export function trigger(target, key, value) {
             }
         });
     }
-};
+}
 
 export function track(target, key) {
     if (activeEffect) {
@@ -70,11 +74,15 @@ export function track(target, key) {
         if (!deps) {
             depsMap.set(key, (deps = new Set()));
         }
-        let shouldTrack = !deps.has(activeEffect);
-        if (shouldTrack) {
-            deps.add(activeEffect);
-            activeEffect.deps.push(deps);
-        }
+        trackEffects(deps)
+    }
+}
+
+export function trackEffects(deps) {
+    let shouldTrack = !deps.has(activeEffect);
+    if (shouldTrack) {
+        deps.add(activeEffect);
+        activeEffect.deps.push(deps);
     }
 }
 

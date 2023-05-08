@@ -1,3 +1,6 @@
-export const isObj = (val) => {
-    return typeof val === 'object' && val !== null
+export const isObj = (value) => {
+    return typeof value === 'object' && value !== null
+}
+export const isFunction = (value) => {
+    return typeof value === 'function'
 }
