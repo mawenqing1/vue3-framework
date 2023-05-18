@@ -10,29 +10,17 @@
         <script src="./reactivity.global.js"></script>
         <div id="app"></div>
         <script>
-            const { effect, reactive, computed, watch } = VueReactivity;
+            const { effect, reactive, computed, watch, ref } = VueReactivity;
 
-            const state = reactive({name: '马文卿', age: 25});
-            let i = 3000;
-            function getData(timer) {
-                return new Promise((res, rej) => {
-                    setTimeout(() => {
-                        res(timer)
-                    }, timer)
-                })
-            };
-            watch(() => state.age, async (newValue, oldValue, onCleanup) => {
-                let f = false;
-                onCleanup(() => {
-                    f = true
-                });
-                i -= 1000;
-                let r = await getData(i);
-                !f && (app.innerHTML = r);
-            });
+            const state = ref(false);
 
-            state.age = 26;
-            state.age = 27;
+            effect(() => {
+                app.innerHTML = state.value
+            })
+
+            setTimeout(() => {
+                state.value = true;
+            }, 1000)
         </script>
     </body>
 </html>
