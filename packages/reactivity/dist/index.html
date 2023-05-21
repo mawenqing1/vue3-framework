@@ -10,16 +10,24 @@
         <script src="./reactivity.global.js"></script>
         <div id="app"></div>
         <script>
-            const { effect, reactive, computed, watch, ref } = VueReactivity;
+            const { effect, reactive, computed, watch, ref, toRef, toRefs } = VueReactivity;
 
-            const state = ref(false);
+            const state = reactive({
+                name: 'mwq',
+                age: 18
+            });
+
+            let { name, age } = toRefs(state)
+
+            // let age = toRef(state, 'age')
+            // let name = toRef(state, 'name')
 
             effect(() => {
-                app.innerHTML = state.value
+                app.innerHTML = name.value + age.value
             })
 
             setTimeout(() => {
-                state.value = true;
+                age.value = 20
             }, 1000)
         </script>
     </body>

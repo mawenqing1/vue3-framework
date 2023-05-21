@@ -22,6 +22,7 @@ class ComputedRefImpl {
     private _dirty = true;
     public effect;
     public deps;
+    private __v_isRef = true;
     constructor(getter, public setter) {
         this.effect = new ReactiveEffect(getter, () => {
             if(!this._dirty) {
