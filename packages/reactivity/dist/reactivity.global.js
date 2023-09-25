@@ -22,6 +22,7 @@ var VueReactivity = (() => {
   __export(src_exports, {
     computed: () => computed,
     effect: () => effect,
+    proxyRefs: () => proxyRefs,
     reactive: () => reactive,
     ref: () => ref,
     toRef: () => toRef,
@@ -265,6 +266,21 @@ var VueReactivity = (() => {
     }
     ;
     return result;
+  }
+  function proxyRefs(object) {
+    return new Proxy(object, {
+      get(target, key, receiver) {
+        let result = Reflect.get(target, key, receiver);
+        return result.__v_isRef ? result.value : result;
+      },
+      set(target, key, value, receiver) {
+        if (target[key].__v_isRef) {
+          target[key].value = value;
+          return true;
+        }
+        return Reflect.set(target, key, value, receiver);
+      }
+    });
   }
   function toReactive(value) {
     return isObj(value) ? reactive(value) : value;

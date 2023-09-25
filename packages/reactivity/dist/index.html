@@ -10,24 +10,29 @@
         <script src="./reactivity.global.js"></script>
         <div id="app"></div>
         <script>
-            const { effect, reactive, computed, watch, ref, toRef, toRefs } = VueReactivity;
+            const { effect, reactive, computed, watch, ref, toRef, toRefs, proxyRefs } = VueReactivity;
 
             const state = reactive({
                 name: 'mwq',
                 age: 18
             });
 
-            let { name, age } = toRefs(state)
+            let { name, age } = toRefs(state);
+
+            let my = proxyRefs({
+                name,
+                age
+            })
 
             // let age = toRef(state, 'age')
             // let name = toRef(state, 'name')
 
             effect(() => {
-                app.innerHTML = name.value + age.value
+                app.innerHTML = my.name + my.age
             })
 
             setTimeout(() => {
-                age.value = 20
+                my.age = 20
             }, 1000)
         </script>
     </body>
