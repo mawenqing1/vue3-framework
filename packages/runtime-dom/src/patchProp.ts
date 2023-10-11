@@ -1,18 +1,16 @@
 import { patchClass } from "./patch-prop/patchClass"
 import { patchStyle } from "./patch-prop/patchStyle"
-
-function patchEvent(el, eventName, nextValue) {
-    const invokers = el._vei || (el._vei = {})
-}
+import { patchEvent } from "./patch-prop/patchEvent"
+import { patchAttr } from "./patch-prop/patchAttr"
 
 export const patchProp = (el, key, preValue, nextValue) => {
     if(key === 'class') {
         patchClass(el, nextValue)
-    }
-    if(key === 'style') {
+    } else if(key === 'style') {
         patchStyle(el, preValue, nextValue)
-    }
-    if(/on[^a-z]/.test(key)) {
+    } else if(/on[^a-z]/.test(key)) {
         patchEvent(el, key, nextValue)
+    } else {
+        patchAttr(el, key, nextValue)
     }
 }

@@ -9,23 +9,24 @@
 
     <div id="app"></div>
     <script src="../../../node_modules/@vue/runtime-dom/dist/runtime-dom.global.js"></script>
+    <script src="./runtime-dom.global.js"></script>
 
     <script>
-        const { createRenderer, h} = VueRuntimeDOM
+        // const { createRenderer, h} = VueRuntimeDOM
 
-        const {render, crateApp} = createRenderer({
-            createElement(element) {
-                return document.createElement(element);
-            },
-            setElementText(element, text) {
-                element.textContent = text;
-            },
-            insert(element, container) {
-                container.appendChild(element);
-            }
-        })
+        // const {render, crateApp} = createRenderer({
+        //     createElement(element) {
+        //         return document.createElement(element);
+        //     },
+        //     setElementText(element, text) {
+        //         element.textContent = text;
+        //     },
+        //     insert(element, container) {
+        //         container.appendChild(element);
+        //     }
+        // })
 
-        render(h('div', 'hello'), app);
+        // render(h('div', 'hello'), app);
 
     </script>
     
