@@ -161,6 +161,17 @@ var VueRuntimeDom = (() => {
       el: null,
       shapeFlag
     };
+    if (children) {
+      let temp = 0;
+      if (isArray(children)) {
+        temp = ShapeFlags.ARRAY_CHILDREN;
+      } else {
+        children = String(children);
+        temp = ShapeFlags.TEXT_CHILDREN;
+      }
+      vnode.shapeFlag |= temp;
+    }
+    console.log("vnode", vnode);
     return vnode;
   }
   var ShapeFlags = /* @__PURE__ */ ((ShapeFlags2) => {

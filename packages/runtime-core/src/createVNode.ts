@@ -1,4 +1,4 @@
-import { isString } from "@vue/shared";
+import { isArray, isString } from "@vue/shared";
 
 export function createVNode(type, props = null, children = null) {
 
@@ -12,6 +12,19 @@ export function createVNode(type, props = null, children = null) {
         el: null,
         shapeFlag
     }
+
+    if(children) {
+        let temp = 0;
+        if(isArray(children)) {
+            temp = ShapeFlags.ARRAY_CHILDREN;
+        } else {
+            children = String(children);
+            temp = ShapeFlags.TEXT_CHILDREN;
+        }
+        vnode.shapeFlag |= temp;
+    }
+    console.log('vnode',vnode);
+    
     
     return vnode;
 }
