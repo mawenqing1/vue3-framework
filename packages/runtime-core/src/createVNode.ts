@@ -1,10 +1,17 @@
 import { isArray, isString } from "@vue/shared";
 
+export const Text = Symbol('Text');
+
+export function isVNode(value) {
+    return value.__v_isVNode;
+}
+
 export function createVNode(type, props = null, children = null) {
 
     let shapeFlag = isString(type) ? ShapeFlags.ELEMENT : 0;
     
     const vnode = {
+        __v_isVNode: true,
         type,
         props,
         children,
@@ -23,8 +30,6 @@ export function createVNode(type, props = null, children = null) {
         }
         vnode.shapeFlag |= temp;
     }
-    console.log('vnode',vnode);
-    
     
     return vnode;
 }

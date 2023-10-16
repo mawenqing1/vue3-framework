@@ -34,9 +34,159 @@ var VueRuntimeDom = (() => {
   // packages/runtime-dom/src/index.ts
   var src_exports = {};
   __export(src_exports, {
+    createRenderer: () => createRenderer,
     createVNode: () => createVNode,
-    h: () => h
+    h: () => h,
+    render: () => render
   });
+
+  // packages/shared/src/index.ts
+  var isObj = (value) => {
+    return typeof value === "object" && value !== null;
+  };
+  var isString = (value) => {
+    return typeof value === "string";
+  };
+  var isArray = Array.isArray;
+  var isNumber = (value) => {
+    return typeof value === "number";
+  };
+
+  // packages/runtime-core/src/createVNode.ts
+  var Text = Symbol("Text");
+  function isVNode(value) {
+    return value.__v_isVNode;
+  }
+  function createVNode(type, props = null, children = null) {
+    let shapeFlag = isString(type) ? ShapeFlags.ELEMENT : 0;
+    const vnode = {
+      __v_isVNode: true,
+      type,
+      props,
+      children,
+      key: props && props.key,
+      el: null,
+      shapeFlag
+    };
+    if (children) {
+      let temp = 0;
+      if (isArray(children)) {
+        temp = ShapeFlags.ARRAY_CHILDREN;
+      } else {
+        children = String(children);
+        temp = ShapeFlags.TEXT_CHILDREN;
+      }
+      vnode.shapeFlag |= temp;
+    }
+    return vnode;
+  }
+  var ShapeFlags = /* @__PURE__ */ ((ShapeFlags2) => {
+    ShapeFlags2[ShapeFlags2["ELEMENT"] = 1] = "ELEMENT";
+    ShapeFlags2[ShapeFlags2["FUNCTIONAL_COMPONENT"] = 2] = "FUNCTIONAL_COMPONENT";
+    ShapeFlags2[ShapeFlags2["STATEFUL_COMPONENT"] = 4] = "STATEFUL_COMPONENT";
+    ShapeFlags2[ShapeFlags2["TEXT_CHILDREN"] = 8] = "TEXT_CHILDREN";
+    ShapeFlags2[ShapeFlags2["ARRAY_CHILDREN"] = 16] = "ARRAY_CHILDREN";
+    ShapeFlags2[ShapeFlags2["SLOTS_CHILDREN"] = 32] = "SLOTS_CHILDREN";
+    ShapeFlags2[ShapeFlags2["TELEPORT"] = 64] = "TELEPORT";
+    ShapeFlags2[ShapeFlags2["SUSPENSE"] = 128] = "SUSPENSE";
+    ShapeFlags2[ShapeFlags2["COMPONENT_SHOULD_KEEP_ALIVE"] = 256] = "COMPONENT_SHOULD_KEEP_ALIVE";
+    ShapeFlags2[ShapeFlags2["COMPONENT_KEPT_ALIVE"] = 512] = "COMPONENT_KEPT_ALIVE";
+    ShapeFlags2[ShapeFlags2["COMPONENT"] = 6] = "COMPONENT";
+    return ShapeFlags2;
+  })(ShapeFlags || {});
+
+  // packages/runtime-core/src/h.ts
+  function h(type, propsOrChildren, children) {
+    const l = arguments.length;
+    if (l === 2) {
+      if (isObj(propsOrChildren) && !isArray(propsOrChildren)) {
+        if (isVNode(propsOrChildren)) {
+          return createVNode(type, null, [propsOrChildren]);
+        }
+        return createVNode(type, propsOrChildren);
+      } else {
+        return createVNode(type, null, propsOrChildren);
+      }
+    } else {
+      if (l === 3 && isVNode(children)) {
+        children = [children];
+      } else if (l > 3) {
+        children = Array.prototype.slice.call(arguments, 2);
+      }
+      return createVNode(type, propsOrChildren, children);
+    }
+  }
+
+  // packages/runtime-core/src/renderer.ts
+  function createRenderer(options) {
+    let {
+      createElement: hostCreateElement,
+      createTextNode: hostCreateTextNode,
+      insert: hostInsert,
+      remove: hostRemove,
+      querySelector: hostQuerySelector,
+      parentNode: hostParentNode,
+      nextSibling: hostNextSibling,
+      setText: hostSetText,
+      setElementText: hostSetElementText,
+      patchProp: hostPatchProp
+    } = options;
+    function normalize(children, i) {
+      if (isNumber(children[i]) || isString(children[i])) {
+        children[i] = createVNode(Text, null, children[i]);
+      }
+      return children[i];
+    }
+    function mountChildren(children, container) {
+      for (let i = 0; i < children.length; i++) {
+        let child = normalize(children, i);
+        patch(null, child, container);
+      }
+    }
+    function mountElement(vnode, container) {
+      let { type, props, children, shapeFlag } = vnode;
+      let el = vnode.el = hostCreateElement(type);
+      if (shapeFlag & 8 /* TEXT_CHILDREN */) {
+        hostSetElementText(el, children);
+      }
+      if (shapeFlag & 16 /* ARRAY_CHILDREN */) {
+        mountChildren(children, el);
+      }
+      hostInsert(el, container);
+    }
+    function processText(n1, n2, container) {
+      if (n1 === null) {
+        hostInsert(n2.el = hostCreateTextNode(n2.children, container));
+      }
+    }
+    function processElement(n1, n2, container) {
+      if (n1 == null) {
+        mountElement(n2, container);
+      }
+    }
+    function patch(n1, n2, container) {
+      const { type, shapeFlag } = n2;
+      switch (type) {
+        case Text:
+          processText(n1, n2, container);
+          break;
+        default:
+          if (shapeFlag & 1 /* ELEMENT */) {
+            processElement(n1, n2, container);
+          }
+      }
+    }
+    function render2(vnode, container) {
+      if (vnode == null) {
+      } else {
+        patch(container._vnode || null, vnode, container);
+      }
+      container._vnode = vnode;
+    }
+    return {
+      render: render2
+    };
+  }
 
   // packages/runtime-dom/src/nodeOps.ts
   var nodeOps = {
@@ -144,58 +294,12 @@ var VueRuntimeDom = (() => {
     }
   };
 
-  // packages/shared/src/index.ts
-  var isString = (value) => {
-    return typeof value === "string";
-  };
-  var isArray = Array.isArray;
-
-  // packages/runtime-core/src/createVNode.ts
-  function createVNode(type, props = null, children = null) {
-    let shapeFlag = isString(type) ? ShapeFlags.ELEMENT : 0;
-    const vnode = {
-      type,
-      props,
-      children,
-      key: props && props.key,
-      el: null,
-      shapeFlag
-    };
-    if (children) {
-      let temp = 0;
-      if (isArray(children)) {
-        temp = ShapeFlags.ARRAY_CHILDREN;
-      } else {
-        children = String(children);
-        temp = ShapeFlags.TEXT_CHILDREN;
-      }
-      vnode.shapeFlag |= temp;
-    }
-    console.log("vnode", vnode);
-    return vnode;
-  }
-  var ShapeFlags = /* @__PURE__ */ ((ShapeFlags2) => {
-    ShapeFlags2[ShapeFlags2["ELEMENT"] = 1] = "ELEMENT";
-    ShapeFlags2[ShapeFlags2["FUNCTIONAL_COMPONENT"] = 2] = "FUNCTIONAL_COMPONENT";
-    ShapeFlags2[ShapeFlags2["STATEFUL_COMPONENT"] = 4] = "STATEFUL_COMPONENT";
-    ShapeFlags2[ShapeFlags2["TEXT_CHILDREN"] = 8] = "TEXT_CHILDREN";
-    ShapeFlags2[ShapeFlags2["ARRAY_CHILDREN"] = 16] = "ARRAY_CHILDREN";
-    ShapeFlags2[ShapeFlags2["SLOTS_CHILDREN"] = 32] = "SLOTS_CHILDREN";
-    ShapeFlags2[ShapeFlags2["TELEPORT"] = 64] = "TELEPORT";
-    ShapeFlags2[ShapeFlags2["SUSPENSE"] = 128] = "SUSPENSE";
-    ShapeFlags2[ShapeFlags2["COMPONENT_SHOULD_KEEP_ALIVE"] = 256] = "COMPONENT_SHOULD_KEEP_ALIVE";
-    ShapeFlags2[ShapeFlags2["COMPONENT_KEPT_ALIVE"] = 512] = "COMPONENT_KEPT_ALIVE";
-    ShapeFlags2[ShapeFlags2["COMPONENT"] = 6] = "COMPONENT";
-    return ShapeFlags2;
-  })(ShapeFlags || {});
-
-  // packages/runtime-core/src/h.ts
-  function h() {
-  }
-
   // packages/runtime-dom/src/index.ts
   var renderOptions = __spreadValues({ patchProp }, nodeOps);
-  console.log(renderOptions);
+  function render(vnode, container) {
+    let { render: render2 } = createRenderer(renderOptions);
+    return render2(vnode, container);
+  }
   return __toCommonJS(src_exports);
 })();
 //# sourceMappingURL=runtime-dom.global.js.map
