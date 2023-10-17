@@ -25,7 +25,17 @@
         //         container.appendChild(element);
         //     }
         // })
-        render(h('h1', 'hello world'), app)
+        render(h('div', {style:{color: 'red'}}, [
+            h('p', {key: 'a1', style:{color: 'blue'}}, 'hello'),
+            h('p', {key: 'a2', style:{color: 'pink'}}, 'world')
+        ]), app)
+
+        setTimeout(() => {
+            render(h('div', {style:{color: 'red'}}, [
+            h('p', {key: 'a1', style:{color: 'pink'}}, 'hello'),
+            h('p', {key: 'a2', style:{color: 'red'}}, 'world')
+        ]), app)
+        }, 1000)
         // console.log(createVNode('h1',{}, 'hello'));
         // render(h('div', 'hello'), app);
     </script>
